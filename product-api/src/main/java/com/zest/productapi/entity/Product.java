@@ -7,7 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "product")
+@Table(name = "product", indexes = {
+        @Index(name = "idx_product_name", columnList = "product_name"),
+        @Index(name = "idx_created_by", columnList = "created_by"),
+        @Index(name = "idx_created_on", columnList = "created_on")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,11 +40,6 @@ public class Product {
     private LocalDateTime modifiedOn;
 
     // One Product -> Many Items
-    @OneToMany(
-            mappedBy = "product",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Item> items;
 }

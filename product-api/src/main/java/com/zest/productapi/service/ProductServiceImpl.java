@@ -58,6 +58,19 @@ public class ProductServiceImpl implements ProductService {
         }
 
         @Override
+        public List<ItemResponse> getItemsByProductId(Integer id) {
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+
+                return product.getItems().stream()
+                                .map(i -> ItemResponse.builder()
+                                                .id(i.getId())
+                                                .quantity(i.getQuantity())
+                                                .build())
+                                .collect(Collectors.toList());
+        }
+
+        @Override
         public ProductResponse updateProduct(Integer id, ProductRequest request) {
 
                 Product product = productRepository.findById(id)
