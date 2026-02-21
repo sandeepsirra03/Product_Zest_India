@@ -29,87 +29,87 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ProductControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ProductRepository productRepository;
+        @Autowired
+        private ProductRepository productRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+        @Autowired
+        private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtService jwtService;
+        @Autowired
+        private JwtService jwtService;
 
-    private String adminToken;
-    private String userToken;
+        private String adminToken;
+        private String userToken;
 
-    @BeforeEach
-    void setUp() {
-        User admin = User.builder()
-                .email("admin@test.com")
-                .password(passwordEncoder.encode("password"))
-                .role(Role.ADMIN)
-                .build();
-        userRepository.save(admin);
-        adminToken = "Bearer " + jwtService.generateToken(admin);
+        @BeforeEach
+        void setUp() {
+                User admin = User.builder()
+                                .email("admin@test.com")
+                                .password(passwordEncoder.encode("password"))
+                                .role(Role.ADMIN)
+                                .build();
+                userRepository.save(admin);
+                adminToken = "Bearer " + jwtService.generateToken(admin);
 
-        User user = User.builder()
-                .email("user@test.com")
-                .password(passwordEncoder.encode("password"))
-                .role(Role.USER)
-                .build();
-        userRepository.save(user);
-        userToken = "Bearer " + jwtService.generateToken(user);
-    }
+                User user = User.builder()
+                                .email("user@test.com")
+                                .password(passwordEncoder.encode("password"))
+                                .role(Role.USER)
+                                .build();
+                userRepository.save(user);
+                userToken = "Bearer " + jwtService.generateToken(user);
+        }
 
-    @AfterEach
-    void tearDown() {
-        productRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+        @AfterEach
+        void tearDown() {
+                productRepository.deleteAll();
+                userRepository.deleteAll();
+        }
 
-    @Test
-    void createProduct_WithUserToken_ShouldCreateAndReturnProduct() throws Exception {
-        ProductRequest request = ProductRequest.builder()
-                .productName("Integration Test Product")
-                .createdBy("tester")
-                .items(List.of(new ItemRequest(5)))
-                .build();
+        @Test
+        void createProduct_WithUserToken_ShouldCreateAndReturnProduct() throws Exception {
+                ProductRequest request = ProductRequest.builder()
+                                .productName("Integration Test Product")
+                                .createdBy("tester")
+                                .items(List.of(new ItemRequest(5)))
+                                .build();
 
-        mockMvc.perform(post("/api/v1/products")
-                .header("Authorization", userToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("Integration Test Product"));
-    }
+                mockMvc.perform(post("/api/v1/products")
+                                .header("Authorization", userToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.productName").value("Integration Test Product"));
+        }
 
-    @Test
-    void createProduct_WithoutToken_ShouldReturnForbidden() throws Exception {
-        ProductRequest request = ProductRequest.builder()
-                .productName("Integration Test Product")
-                .createdBy("tester")
-                .items(List.of(new ItemRequest(5)))
-                .build();
+        @Test
+        void createProduct_WithoutToken_ShouldReturnForbidden() throws Exception {
+                ProductRequest request = ProductRequest.builder()
+                                .productName("Integration Test Product")
+                                .createdBy("tester")
+                                .items(List.of(new ItemRequest(5)))
+                                .build();
 
-        mockMvc.perform(post("/api/v1/products")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
-    }
+                mockMvc.perform(post("/api/v1/products")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isForbidden());
+        }
 
-    @Test
-    void getAllProducts_WithUserToken_ShouldReturnPage() throws Exception {
-        mockMvc.perform(get("/api/v1/products?page=0&size=10")
-                .header("Authorization", userToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
-    }
+        @Test
+        void getAllProducts_WithUserToken_ShouldReturnPage() throws Exception {
+                mockMvc.perform(get("/api/v1/products?page=0&size=10")
+                                .header("Authorization", userToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content").isArray());
+        }
 }

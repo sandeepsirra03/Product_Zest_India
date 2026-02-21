@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class    AuthController {
+public class AuthController {
 
     private final AuthenticationService service;
 
@@ -28,5 +28,11 @@ public class    AuthController {
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthenticationResponse> refreshToken(
+            jakarta.servlet.http.HttpServletRequest request) {
+        return ResponseEntity.ok(service.refreshToken(request));
     }
 }

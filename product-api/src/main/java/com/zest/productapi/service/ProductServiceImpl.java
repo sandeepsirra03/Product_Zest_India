@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 public class ProductServiceImpl implements ProductService {
 
         private final ProductRepository productRepository;
+        private final AuditLogService auditLogService;
 
         @Override
         public ProductResponse createProduct(ProductRequest request) {
@@ -40,6 +41,10 @@ public class ProductServiceImpl implements ProductService {
                 product.setItems(items);
 
                 Product saved = productRepository.save(product);
+
+                // Trigger async background task
+                auditLogService.logProductAction("CREATE", saved.getId(), saved.getProductName(), saved.getCreatedBy());
+
                 return mapToResponse(saved);
         }
 
@@ -88,7 +93,13 @@ public class ProductServiceImpl implements ProductService {
                                                 .product(product)
                                                 .build()));
 
-                return mapToResponse(productRepository.save(product));
+                Product updated = productRepository.save(product);
+
+                // Trigger async background task
+                auditLogService.logProductAction("UPDATE", updated.getId(), updated.getProductName(),
+                                updated.getModifiedBy());
+
+                return mapToResponse(updated);
         }
 
         @Override
@@ -96,7 +107,13 @@ public class ProductServiceImpl implements ProductService {
                 Product product = productRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
+                String productName = product.getProductName();
+                String createdBy = product.getCreatedBy(); // or whoever is determining the deletion
+
                 productRepository.delete(product);
+
+                // Trigger async background task
+                auditLogService.logProductAction("DELETE", id, productName, createdBy);
         }
 
         private ProductResponse mapToResponse(Product product) {

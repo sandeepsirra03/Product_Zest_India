@@ -31,7 +31,6 @@ class ProductServiceImplTest {
     @Mock
     private ProductRepository productRepository;
 
-    @InjectMocks
     private ProductServiceImpl productService;
 
     private Product product;
@@ -39,6 +38,8 @@ class ProductServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        productService = new ProductServiceImpl(productRepository, new AuditLogService());
+
         product = Product.builder()
                 .id(1)
                 .productName("Test Product")
